@@ -33,7 +33,7 @@
         <tfoot>
             <tr>
                 <td colspan="3">Total price</td>
-                <td>{{ $total }}</td>
+                <td>{{ $totalPrice }}</td>
                 <td></td>
             </tr>
         </tfoot>

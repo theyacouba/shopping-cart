@@ -2,80 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Services\Cart\CartService;
 
 class CartController extends Controller
 {
-    public function index(Request $request)
+    public function index(CartService $cartService)
     {
-        $cart = $request->session()->get('cart');
-
-        $carts = [];
-
-        foreach ($cart as $product => $quantity) {
-            $carts[] = [
-                'product' => Product::find($product),
-                'quantity' => $quantity
-            ];
-        }
-
-        $total = 0;
-
-        foreach ($carts as $cart) {
-            $total += $cart['quantity'] * $cart['product']->price;
-        }
-
+        $carts = $cartService->cart();
+        $totalPrice = $cartService->totalPrice();
+        
         return view('cart.index', [
             'carts' => $carts,
-            'total' => $total
+            'totalPrice' => $totalPrice
         ]);
     }
 
-    public function add(int $id, Request $request)
+    public function add(int $id, CartService $cartService)
     {
-        $cart = $request->session()->get('cart', []);
-
-        if(!empty($cart[$id])){
-            $cart[$id]++;
-        }else {
-            $cart[$id] = 1;
-        }
-
-        $request->session()->put('cart', $cart);
+        $cartService->add($id);
 
         return back();
     }
 
-    public function update(int $id, Request $request)
+    public function update(int $id, CartService $cartService)
     {
-        if($request->quantity <= 0) {
-            return back();
-        }
-        
-        $request->validate([
-            'quantity' => 'required|integer'
-        ]);
-
-        $cart = $request->session()->get('cart');
-        
-
-        $cart[$id] = intval($request->quantity);
-
-        $request->session()->put('cart', $cart);
+        $cartService->update($id);
 
         return back();
     }
 
-    public function remove(int $id, Request $request)
+    public function remove(int $id, CartService $cartService)
     {
-        $cart = $request->session()->get('cart');
 
-        unset($cart[$id]);
-
-        $request->session()->put('cart', $cart);
-
+        $cartService->remove($id);
         return back();
-
+        
     }
 }
